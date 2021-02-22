@@ -17,7 +17,7 @@ public class FareCalculatorService {
         double initialDuration = (outHour - inHour) / (3600 * 1000);
         double paidDuration = initialDuration - freeParkingDuration;
 
-        if (paidDuration < 1) return;
+        if (paidDuration < 0) return;
 
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR: {
