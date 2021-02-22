@@ -18,14 +18,17 @@ public class FareCalculatorService {
         double paidDuration = initialDuration - freeParkingDuration;
 
         if (paidDuration < 0) return;
+        if (paidDuration < 1) paidDuration = 1;
+
+        paidDuration = Math.ceil(paidDuration*4)/4f; // Round the paid duration to the
 
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR: {
-                ticket.setPrice(Math.round(paidDuration * Fare.CAR_RATE_PER_HOUR * 10) / 10.0);
+                ticket.setPrice(Math.round(paidDuration * Fare.CAR_RATE_PER_HOUR * 100) / 100.0);
                 break;
             }
             case BIKE: {
-                ticket.setPrice(Math.round(paidDuration * Fare.BIKE_RATE_PER_HOUR * 10) / 10.0);
+                ticket.setPrice(Math.round(paidDuration * Fare.BIKE_RATE_PER_HOUR * 100) / 100.0);
                 break;
             }
             default:
