@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -40,11 +41,12 @@ public class FareCalculatorServiceTest {
      * Values used for meansOfLocomotion : {ParkingType.CAR, ParkingType.BIKE}
      */
     @ParameterizedTest
+    @DisplayName("Calculate fare for bike or car for several durations")
     @ArgumentsSource(FareCalculatorCustomArgumentProvider.class)
     public void calculateFareCarOrBikeAndForSeveralDurations(int minutes, double expected, ParkingType meansOfLocomotion) {
         String meansOfLocomotionLabel = (meansOfLocomotion == ParkingType.CAR) ? "CAR" : "BIKE";
 
-        Date outTime = DateUtils.addMinutes(this.inTime, minutes);
+        Date outTime = DateUtils.addMinutes(inTime, minutes);
         ParkingSpot parkingSpot = new ParkingSpot(1, meansOfLocomotion, false);
 
         ticket.setParkingSpot(parkingSpot);
@@ -61,14 +63,46 @@ public class FareCalculatorServiceTest {
     }
 
     @Test
-    public void calculateFareUnknownType() {
-        Date inTime = new Date(), outTime = DateUtils.addMinutes(inTime, 90);
+    @DisplayName("calculateFare method should throw an IllegalArgumentException if outTime is before inTime")
+    public void calculateFareWithOutTimeBeforeInTimeShouldThrowIllegalArgumentException() {
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+        ticket.setInTime(inTime);
+        ticket.setOutTime(DateUtils.addMinutes(inTime, -600));
+        ticket.setParkingSpot(parkingSpot);
+        assertThrows(IllegalArgumentException.class, () -> fareCalculatorService.calculateFare(ticket));
+    }
+
+    @Test
+    @DisplayName("calculateFare method should throw an AssertionError if outTime isn't set")
+    public void calculateFareWithOutTimeEqualToNullShouldThrowAssertionError() {
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+        ticket.setInTime(inTime);
+        ticket.setParkingSpot(parkingSpot);
+        assertThrows(AssertionError.class, () -> fareCalculatorService.calculateFare(ticket));
+    }
+
+    @Test
+    @DisplayName("calculateFare method should throw a NullPointerException if parkingType isn't set")
+    public void calculateFareWithAnUnknownParkingTypeShouldThrowNullPointerException() {
+        Date outTime = DateUtils.addMinutes(this.inTime, 90);
         ParkingSpot parkingSpot = new ParkingSpot(1, null, false);
 
         ticket.setInTime(inTime);
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         assertThrows(NullPointerException.class, () -> fareCalculatorService.calculateFare(ticket));
+    }
+
+    @Test
+    @DisplayName("calculateFare method should throw an IllegalArgumentException if parkingType has a wrong value")
+    public void calculateFareWithAWrongParkingTypeShouldThrowAnIllegalArgumentException() {
+        Date outTime = DateUtils.addMinutes(this.inTime, 90);
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.TRUCK, false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+        assertThrows(IllegalArgumentException.class, () -> fareCalculatorService.calculateFare(ticket));
     }
 
 }
