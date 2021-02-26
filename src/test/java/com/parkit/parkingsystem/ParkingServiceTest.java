@@ -44,6 +44,7 @@ public class ParkingServiceTest {
             when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
 
             when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
+            when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class)));
 
             parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         } catch (Exception e) {
@@ -55,6 +56,12 @@ public class ParkingServiceTest {
     @Test
     public void processExitingVehicleTest(){
         parkingService.processExitingVehicle();
+        verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+    }
+
+    @Test
+    public void processIncomingVehicleTest(){
+        parkingService.processIncomingVehicle();
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
 

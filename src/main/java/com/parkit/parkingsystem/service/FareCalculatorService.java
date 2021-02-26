@@ -3,12 +3,12 @@ package com.parkit.parkingsystem.service;
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
 
-import static com.parkit.parkingsystem.util.Round.roundAt2Decimals;
+import static com.parkit.parkingsystem.util.RoundUtil.roundAt2Decimals;
 
 public class FareCalculatorService {
     double paidDuration;
 
-    public double calculatePaidDuration(Ticket ticket) {
+    private double calculatePaidDuration(Ticket ticket) {
         double inHour = ticket.getInTime().getTime();
         double outHour = ticket.getOutTime().getTime();
 
