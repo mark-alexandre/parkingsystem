@@ -1,0 +1,6 @@
+# Itellij related files
+.idea
+parking-system.iml
+
+# Maven build directory
+target/
