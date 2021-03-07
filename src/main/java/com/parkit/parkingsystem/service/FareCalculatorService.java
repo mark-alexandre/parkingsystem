@@ -3,14 +3,11 @@ package com.parkit.parkingsystem.service;
 import com.parkit.parkingsystem.config.DataBaseConfig;
 import com.parkit.parkingsystem.constants.DBConstants;
 import com.parkit.parkingsystem.constants.Fare;
-import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
-import com.parkit.parkingsystem.util.PropertyFileReading;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -18,8 +15,6 @@ import static com.parkit.parkingsystem.util.RoundUtil.roundAt2Decimals;
 
 public class FareCalculatorService {
     private static final Logger logger = LogManager.getLogger("DataBaseConfig");
-    private static final String[] dbInfo = PropertyFileReading.getDbInfo();
-    private static final TicketDAO ticketDAO = new TicketDAO();
     double paidDuration;
 
     private Boolean isRecurrentMember(String regNumber) {
@@ -72,7 +67,7 @@ public class FareCalculatorService {
 
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR: {
-                if (isRecurrentMember(ticket.getVehicleRegNumber()) == true) {
+                if (isRecurrentMember(ticket.getVehicleRegNumber())) {
                     ticket.setPrice(roundAt2Decimals(paidDuration * Fare.CAR_RATE_PER_HOUR * 0.95));
                 } else {
                     ticket.setPrice(roundAt2Decimals(paidDuration * Fare.CAR_RATE_PER_HOUR));
