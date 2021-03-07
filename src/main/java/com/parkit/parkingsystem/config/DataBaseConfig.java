@@ -1,5 +1,6 @@
 package com.parkit.parkingsystem.config;
 
+import com.parkit.parkingsystem.util.PropertyFileReading;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -8,12 +9,20 @@ import java.sql.*;
 public class DataBaseConfig {
 
     private static final Logger logger = LogManager.getLogger("DataBaseConfig");
+    private static final String[] dbInfo = PropertyFileReading.getDbInfo();
 
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         logger.info("Create DB connection");
         Class.forName("com.mysql.cj.jdbc.Driver");
         return DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/prod","root","rootroot");
+                "jdbc:mysql://localhost:3306/prod" +
+                        "?useUnicode=true" +
+                        "&useJDBCCompliantTimezoneShift=true" +
+                        "&useLegacyDatetimeCode=false" +
+                        "&serverTimezone=UTC",
+                dbInfo[0],
+                dbInfo[1]
+        );
     }
 
     public void closeConnection(Connection con){
