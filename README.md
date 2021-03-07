@@ -38,6 +38,8 @@ This code uses the default root account to connect and the password can be set a
 Post installation of MySQL, Java and Maven, you will have to set up the tables and data in the data base.
 For this, please run the sql commands present in the `Data.sql` file under the `resources` folder in the code base.
 
+In the root directory, you have a db.properties.dist file which allows you to define specific credential for the database. Just remove the .dist extension and put in your real credentials.
+
 Finally, you will be ready to import the code into an IDE of your choice and run the App.java to launch the application.
 
 ### Testing

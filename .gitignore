@@ -4,3 +4,6 @@ parking-system.iml
 
 # Maven build directory
 target/
+
+# Critical files
+db.properties
