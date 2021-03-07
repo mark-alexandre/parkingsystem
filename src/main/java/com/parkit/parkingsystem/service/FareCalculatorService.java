@@ -1,6 +1,9 @@
 package com.parkit.parkingsystem.service;
 
+import com.parkit.parkingsystem.config.DataBaseConfig;
+import com.parkit.parkingsystem.constants.DBConstants;
 import com.parkit.parkingsystem.constants.Fare;
+import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.util.PropertyFileReading;
 import org.apache.logging.log4j.LogManager;
@@ -16,31 +19,28 @@ import static com.parkit.parkingsystem.util.RoundUtil.roundAt2Decimals;
 public class FareCalculatorService {
     private static final Logger logger = LogManager.getLogger("DataBaseConfig");
     private static final String[] dbInfo = PropertyFileReading.getDbInfo();
+    private static final TicketDAO ticketDAO = new TicketDAO();
     double paidDuration;
 
     private Boolean isRecurrentMember(String regNumber) {
         try {
-            // create the mysql database connection
-            String myDriver = "org.gjt.mm.mysql.Driver";
-            String myUrl = "jdbc:mysql://localhost/prod";
-            Class.forName(myDriver);
-            Connection conn = DriverManager.getConnection(myUrl, dbInfo[0], dbInfo[1]);
-
-            // check if an existing registration number is registered in the ticket table
-            String query = "SELECT " + regNumber + " FROM ticket";
+            Connection con = null;
+            con = new DataBaseConfig().getConnection();
 
             // create the java statement
-            Statement st = conn.createStatement();
+            Statement st = con.createStatement();
 
             // execute the query, and get the result
-            ResultSet rs = st.executeQuery(query);
-
-            // close the connexion
-            st.close();
+            ResultSet rs = st.executeQuery(DBConstants.GET_TICKET_BY_REG_NUMBER);
 
             // return true or false if a regNumber has ben found
-            return rs.first();
-
+            int count = -1;
+            while (rs.next()) {
+                ++count;
+            }
+            // close the connexion
+            st.close();
+            return count >= 1;
         }
         catch (Exception e) {
             logger.error("Got an exception! ");
@@ -72,7 +72,7 @@ public class FareCalculatorService {
 
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR: {
-                if (isRecurrentMember(ticket.getVehicleRegNumber())) {
+                if (isRecurrentMember(ticket.getVehicleRegNumber()) == true) {
                     ticket.setPrice(roundAt2Decimals(paidDuration * Fare.CAR_RATE_PER_HOUR * 0.95));
                 } else {
                     ticket.setPrice(roundAt2Decimals(paidDuration * Fare.CAR_RATE_PER_HOUR));
