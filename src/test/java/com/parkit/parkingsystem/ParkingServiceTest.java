@@ -40,7 +40,6 @@ public class ParkingServiceTest {
             ticket.setParkingSpot(parkingSpot);
             ticket.setVehicleRegNumber("ABCDEF");
             parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-            //TODO FareCalculatorService to mock
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to set up test mock objects");
@@ -56,7 +55,6 @@ public class ParkingServiceTest {
 
     @Test
     public void processExitingVehicleTest() {
-        // TODO
         when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
         when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
         processIncomingVehicle();
