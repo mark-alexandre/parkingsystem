@@ -1,47 +1,22 @@
 package com.parkit.parkingsystem.service;
 
-import com.parkit.parkingsystem.config.DataBaseConfig;
-import com.parkit.parkingsystem.constants.DBConstants;
 import com.parkit.parkingsystem.constants.Fare;
+import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.SQLException;
 
 import static com.parkit.parkingsystem.util.RoundUtil.roundAt2Decimals;
 
 public class FareCalculatorService {
-    private static final Logger logger = LogManager.getLogger("DataBaseConfig");
+    private final TicketDAO ticketDAO;
     double paidDuration;
+    private static final Logger logger = LogManager.getLogger("FareCalculatorService");
 
-    private Boolean isRecurrentMember(String regNumber) {
-        try {
-            Connection con = null;
-            con = new DataBaseConfig().getConnection();
-
-            // create the java statement
-            Statement st = con.createStatement();
-
-            // execute the query, and get the result
-            ResultSet rs = st.executeQuery(DBConstants.GET_TICKET_BY_REG_NUMBER);
-
-            // return true or false if a regNumber has ben found
-            int count = -1;
-            while (rs.next()) {
-                ++count;
-            }
-            // close the connexion
-            st.close();
-            return count >= 1;
-        }
-        catch (Exception e) {
-            logger.error("Got an exception! ");
-            logger.error(e.getMessage());
-        }
-        return false;
+    public FareCalculatorService(TicketDAO ticketDAO) {
+        this.ticketDAO = ticketDAO;
     }
 
     private double calculatePaidDuration(Ticket ticket) {
@@ -64,10 +39,16 @@ public class FareCalculatorService {
         }
 
         this.paidDuration = this.calculatePaidDuration(ticket);
+        boolean isRecurrentMember = false; // Default value in case of failure
+        try {
+            isRecurrentMember = ticketDAO.isRecurrentMember(ticket.getVehicleRegNumber());
+        } catch (SQLException | ClassNotFoundException e) {
+            logger.error("An error has occurred during the database process", e);
+        }
 
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR: {
-                if (isRecurrentMember(ticket.getVehicleRegNumber())) {
+                if (isRecurrentMember) {
                     ticket.setPrice(roundAt2Decimals(paidDuration * Fare.CAR_RATE_PER_HOUR * 0.95));
                 } else {
                     ticket.setPrice(roundAt2Decimals(paidDuration * Fare.CAR_RATE_PER_HOUR));
@@ -75,7 +56,7 @@ public class FareCalculatorService {
                 break;
             }
             case BIKE: {
-                if (isRecurrentMember(ticket.getVehicleRegNumber())) {
+                if (isRecurrentMember) {
                     ticket.setPrice(roundAt2Decimals(paidDuration * Fare.BIKE_RATE_PER_HOUR * 0.95));
                 } else {
                     ticket.setPrice(roundAt2Decimals(paidDuration * Fare.BIKE_RATE_PER_HOUR));

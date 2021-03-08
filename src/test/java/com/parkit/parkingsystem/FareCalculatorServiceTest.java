@@ -1,6 +1,7 @@
 package com.parkit.parkingsystem;
 
 import com.parkit.parkingsystem.constants.ParkingType;
+import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
@@ -14,9 +15,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.mockito.Mock;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.sql.SQLException;
 import java.util.Date;
 
 public class FareCalculatorServiceTest {
@@ -24,10 +27,12 @@ public class FareCalculatorServiceTest {
     private static FareCalculatorService fareCalculatorService;
     private Ticket ticket;
     private Date inTime;
+    @Mock
+    private static TicketDAO ticketDAO;
 
     @BeforeAll
     private static void setUp() {
-        fareCalculatorService = new FareCalculatorService();
+        fareCalculatorService = new FareCalculatorService(new TicketDAO());
     }
 
     @BeforeEach
@@ -43,7 +48,7 @@ public class FareCalculatorServiceTest {
     @ParameterizedTest
     @DisplayName("Calculate fare for bike or car for several durations")
     @ArgumentsSource(FareCalculatorCustomArgumentProvider.class)
-    public void calculateFareCarOrBikeAndForSeveralDurations(int minutes, double expected, ParkingType meansOfLocomotion) {
+    public void calculateFareCarOrBikeAndForSeveralDurations(int minutes, double expected, ParkingType meansOfLocomotion) throws SQLException, ClassNotFoundException {
         String meansOfLocomotionLabel = (meansOfLocomotion == ParkingType.CAR) ? "CAR" : "BIKE";
 
         Date outTime = DateUtils.addMinutes(inTime, minutes);
